@@ -11,29 +11,29 @@ import java.awt.event.MouseListener;
 
 public class GameFrame extends JFrame implements MouseListener{
 
-    private final int SCREEN_WIDTH = 1200;
-    private final int SCREEN_HEIGHT = 700;
+    private final int SCREEN_WIDTH    = 1200;
+    private final int SCREEN_HEIGHT   = 700;
+    private final int BOARD_WIDTH     = 900;
+    private final int NULL            = 0;
+    private boolean arePiecesPlaced   = false;
+
     public static final int TILE_SIZE = 100;
-    private final int BOARD_WIDTH = 900;
-    private final int NULL = 0;
     public static final int ROW_LIMIT = 7;
     public static final int COL_LIMIT = 9;
-    private boolean arePiecesPlaced = false;
 
-
-    final Tile[][] tileCollection = new Tile[ROW_LIMIT][COL_LIMIT];
-    Tile selectedTile;
-    Tile initialTile;
-    public ImageIcon image = new ImageIcon("src/resources/elf.png");
+    private final Tile[][] tileCollection = new Tile[ROW_LIMIT][COL_LIMIT];
+    private Tile selectedTile;
+    private Tile initialTile;
 
     public GameFrame(){
 
         this.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
-        this.setResizable(false);
+        //this.setResizable(false);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setVisible(true);
         this.addMouseListener(this);
     }
+
 
     @Override
     public void paint(Graphics g){
@@ -52,14 +52,15 @@ public class GameFrame extends JFrame implements MouseListener{
 
     private void renderTiles(Graphics g){
 
-        for(int row = NULL; row < this.tileCollection.length; row++) {
+        for(int row = NULL; row < ROW_LIMIT; row++) {
 
-            for (int col = NULL; col < this.tileCollection[row].length; col++) {
+            for (int col = NULL; col < COL_LIMIT; col++) {
 
                 if(!arePiecesPlaced) {
                     this.tileCollection[row][col] = new Tile(row, col, null);
                 }
-                if(col == 2 || col == 3 || col == 4){
+
+                if(row == 2 || row == 3 || row == 4){
                     this.tileCollection[row][col].setColor(Color.WHITE);
                 }
                 else if((row + col) % 2 == NULL) {
@@ -104,16 +105,15 @@ public class GameFrame extends JFrame implements MouseListener{
         int selectedCol = e.getX() / TILE_SIZE;
 
         if(this.selectedTile != null){
+
             if(this.tileCollection[selectedRow][selectedCol].getPiece() == null){
+
                 if(this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol)){
 
                     movement(selectedRow, selectedCol);
                     this.repaint();
                     return;
                 }
-            }
-            else{
-                this.selectedTile = null;
             }
         }
 
@@ -147,9 +147,12 @@ public class GameFrame extends JFrame implements MouseListener{
 
     private void placePieces(){
 
-        this.tileCollection[0][0].setPiece(new Elf(0,0));
-        this.tileCollection[0][1].setPiece(new Dwarf(0,1));
-        this.tileCollection[0][2].setPiece(new Knight(0,2));
+        this.tileCollection[0][0].setPiece(new Elf(0,0, "RED"));
+        this.tileCollection[0][1].setPiece(new Dwarf(0,1, "RED"));
+        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED"));
+        this.tileCollection[1][0].setPiece(new Elf(1,0, "RED"));
+        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED"));
+        this.tileCollection[1][2].setPiece(new Knight(1,2, "RED"));
         this.arePiecesPlaced = true;
     }
 

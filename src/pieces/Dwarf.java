@@ -2,11 +2,17 @@ package pieces;
 
 public class Dwarf extends Piece {
 
-    public Dwarf(int currentRow, int currentCol){
+    public Dwarf(int currentRow, int currentCol, String team){
 
+        this.team = team;
         this.currentRow = currentRow;
         this.currentCol = currentCol;
-        this.imageSource = "/resources/images/dwarf.png";
+
+        if (team.equals("RED")) {
+            this.imageSource = "/resources/images/dwarfR.gif";
+        }else if(team.equals("GREEN")){
+            this.imageSource = "/resources/images/dwarfG.gif";
+        }
 
         setDmg(6);
         setArmor(2);

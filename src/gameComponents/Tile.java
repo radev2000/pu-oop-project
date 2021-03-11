@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class Tile {
 
-    private final int TILE_SIZE = 100;
+    private final int TILE_SIZE = GameFrame.TILE_SIZE;
     private int rowIndex;
     private int colIndex;
     private Color color;
@@ -42,6 +42,6 @@ public class Tile {
 
     public void render(Graphics g){
         g.setColor(this.color);
-        g.fillRect(rowIndex * TILE_SIZE, colIndex * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        g.fillRect(colIndex * TILE_SIZE, rowIndex * TILE_SIZE, TILE_SIZE, TILE_SIZE);
     }
 }

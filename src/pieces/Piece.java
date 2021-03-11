@@ -4,8 +4,11 @@ import gameComponents.GameFrame;
 import gameComponents.Tile;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public abstract class Piece {
 
@@ -14,30 +17,43 @@ public abstract class Piece {
     protected int hp;
     protected int movementLimit;
     protected int attackRange;
+    protected int initialRow;
+    protected int initialCol;
     protected int currentRow;
     protected int currentCol;
     protected int movesPerformed;
     protected String imageSource;
+    protected String team;
 
     public void setCurrentRow(int currentRow) {
         this.currentRow = currentRow;
     }
 
+
     public void setCurrentCol(int currentCol) {
         this.currentCol = currentCol;
     }
+
+
+    public String getTeam() {
+        return team;
+    }
+
 
     public int getDmg() {
         return dmg;
     }
 
+
     protected void setDmg(int dmg) {
         this.dmg = dmg;
     }
 
+
     public int getArmor() {
         return armor;
     }
+
 
     protected void setArmor(int armor) {
         this.armor = armor;
@@ -113,18 +129,28 @@ public abstract class Piece {
 
     public boolean isMoveValid(int givenRow, int givenCol){
         if(givenRow >= 0 && givenRow < GameFrame.ROW_LIMIT &&
-           givenCol >= 0 && givenCol < GameFrame.COL_LIMIT){
+           givenCol >= 0 && givenCol < GameFrame.COL_LIMIT ){
 
             if(givenRow != this.currentRow || givenCol != this.currentCol){
 
-                while(this.movesPerformed <= this.movementLimit){
+                this.initialRow = this.currentRow;
+                this.initialCol = this.currentCol;
+
+                while(this.movesPerformed < this.movementLimit){
 
                     moveVertical(givenRow);
-                    moveHorizontal(givenCol);
-
-                    if(givenRow == this.currentRow && givenCol == this.currentCol){
+                    if(this.movesPerformed < this.movementLimit) {
+                        moveHorizontal(givenCol);
+                    }
+                    if((givenRow == this.currentRow && givenCol == this.currentCol)){
                         this.movesPerformed = 0;
                         return true;
+                    }
+                    if(this.movesPerformed == this.movementLimit){
+                        this.movesPerformed = 0;
+                        this.currentRow = this.initialRow;
+                        this.currentCol = this.initialCol;
+                        return false;
                     }
                 }
             }
@@ -139,10 +165,10 @@ public abstract class Piece {
         int y = this.currentRow * GameFrame.TILE_SIZE;
 
         try{
-            BufferedImage icon = ImageIO.read(getClass().getResourceAsStream(imageSource));
+            BufferedImage icon = ImageIO.read(getClass().getResourceAsStream(this.imageSource));
             g.drawImage(icon, x, y, GameFrame.TILE_SIZE, GameFrame.TILE_SIZE, null);
         }
-        catch(Exception e){
+        catch(IOException e){
         e.printStackTrace();
         }
 

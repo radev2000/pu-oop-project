@@ -22,7 +22,7 @@ public class GameFrame extends JFrame implements MouseListener{
     private final int NULL            = 0;
     private boolean arePiecesPlaced   = false;
     private boolean isTileSelected    = false;
-    private boolean isGreenPlayerTurn = true;
+    public static boolean isGreenPlayerTurn = true;
 
     private int greenPiecesLeft = 4;
     private int redPiecesLeft = 4;
@@ -75,15 +75,17 @@ public class GameFrame extends JFrame implements MouseListener{
 
                     movement(selectedRow, selectedCol);
                     this.repaint();
-                    this.isGreenPlayerTurn = false;
+                    isGreenPlayerTurn = false;
                     return;
+                }
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() != null &&
+                   this.initialTile.getPiece().isAttackValid(selectedRow, selectedCol, tileCollection, initialTile)){
+                    System.out.println("ATTACK");
                 }
             }
             if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("GREEN")){
                 selectPiece(selectedRow, selectedCol);
-                return;
             }
-
         }
     }
 
@@ -98,13 +100,12 @@ public class GameFrame extends JFrame implements MouseListener{
 
                     movement(selectedRow, selectedCol);
                     this.repaint();
-                    this.isGreenPlayerTurn = true;
+                    isGreenPlayerTurn = true;
                     return;
                 }
             }
             if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("RED")){
                 selectPiece(selectedRow, selectedCol);
-                return;
             }
         }
     }

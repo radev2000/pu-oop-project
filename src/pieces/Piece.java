@@ -4,10 +4,9 @@ import gameComponents.GameFrame;
 import gameComponents.Tile;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 
 public abstract class Piece {
@@ -17,13 +16,24 @@ public abstract class Piece {
     protected int hp;
     protected int movementLimit;
     protected int attackRange;
-    protected int initialRow;
-    protected int initialCol;
+    protected String pieceType;
+    public static int initialRow;
+    public static int initialCol;
     protected int currentRow;
     protected int currentCol;
     protected int movesPerformed;
     protected String imageSource;
     protected String team;
+    private int loops;
+    private boolean result = false;
+
+    public String getPieceType() {
+        return pieceType;
+    }
+
+    public void setPieceType(String pieceType) {
+        this.pieceType = pieceType;
+    }
 
     public void setCurrentRow(int currentRow) {
         this.currentRow = currentRow;
@@ -83,76 +93,147 @@ public abstract class Piece {
         this.attackRange = attackRange;
     }
 
-    private String getMovementHorizontalDirection(int givenCol){
-        if(givenCol < this.currentCol){
+    private String getMovementHorizontalDirection(int givenCol) {
+        if (givenCol < this.currentCol) {
             return "LEFT";
-        }
-        else if(givenCol > this.currentCol){
+        } else if (givenCol > this.currentCol) {
             return "RIGHT";
         }
         return "CURRENT";
     }
 
-    private String getMovementVerticalDirection(int givenRow){
-        if(givenRow < this.currentRow){
+    private String getMovementVerticalDirection(int givenRow) {
+        if (givenRow < this.currentRow) {
             return "UP";
-        }
-        else if(givenRow > this.currentRow){
+        } else if (givenRow > this.currentRow) {
             return "DOWN";
         }
         return "CURRENT";
     }
 
-    private void moveHorizontal(int givenCol){
+    private void moveHorizontal(int givenCol, Tile[][] tileCollection) {
 
-        if(getMovementHorizontalDirection(givenCol).equals("LEFT")){
+        if (getMovementHorizontalDirection(givenCol).equals("LEFT") &&
+                tileCollection[this.currentRow][this.currentCol - 1].getPiece() == null) {
             this.currentCol--;
             this.movesPerformed++;
-        }
-        else if(getMovementHorizontalDirection(givenCol).equals("RIGHT")){
+        } else if (getMovementHorizontalDirection(givenCol).equals("RIGHT") &&
+                tileCollection[this.currentRow][this.currentCol + 1].getPiece() == null
+        ) {
             this.currentCol++;
             this.movesPerformed++;
         }
     }
 
-    private void moveVertical(int givenRow){
+    private void moveVertical(int givenRow, Tile[][] tileCollection) {
 
-        if(getMovementVerticalDirection(givenRow).equals("UP")){
+        if (getMovementVerticalDirection(givenRow).equals("UP") &&
+                tileCollection[this.currentRow - 1][this.currentCol].getPiece() == null) {
             currentRow--;
             movesPerformed++;
-        }
-        else if(getMovementVerticalDirection(givenRow).equals("DOWN")){
+        } else if (getMovementVerticalDirection(givenRow).equals("DOWN") &&
+                tileCollection[this.currentRow + 1][this.currentCol].getPiece() == null) {
             currentRow++;
             movesPerformed++;
         }
     }
 
-    public boolean isMoveValid(int givenRow, int givenCol){
+    private void isMoveValidWithVerticalPrio(int givenRow, int givenCol, Tile[][] tileCollection) {
+
+        while (this.movesPerformed < this.movementLimit && loops < 5) {
+
+            moveVertical(givenRow, tileCollection);
+            if (this.movesPerformed < this.movementLimit) {
+                moveHorizontal(givenCol, tileCollection);
+            }
+            if ((givenRow == this.currentRow && givenCol == this.currentCol)) {
+                this.movesPerformed = 0;
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                this.result = true;
+                return;
+            }
+            if (this.movesPerformed == this.movementLimit) {
+                this.movesPerformed = 0;
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                this.result = false;
+                return;
+            }
+            loops++;
+            if(loops > 4){
+                this.movesPerformed = 0;
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                this.result = false;
+                loops = 0;
+                return;
+            }
+        }
+
+    }
+
+    private void isMoveValidWithHorizontalPrio(int givenRow, int givenCol, Tile[][] tileCollection) {
+
+        while (this.movesPerformed < this.movementLimit && loops < 5) {
+
+            moveHorizontal(givenCol, tileCollection);
+            if (this.movesPerformed < this.movementLimit) {
+                moveVertical(givenRow, tileCollection);
+            }
+            if ((givenRow == this.currentRow && givenCol == this.currentCol)) {
+                this.movesPerformed = 0;
+                this.result = true;
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                return;
+            }
+            if (this.movesPerformed == this.movementLimit) {
+                this.movesPerformed = 0;
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                this.result = false;
+                return;
+            }
+            loops++;
+            if(loops > 4){
+                this.movesPerformed = 0;
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                this.result = false;
+                loops = 0;
+                return;
+            }
+        }
+    }
+
+    public boolean isMoveValid(int givenRow, int givenCol, Tile[][] tileCollection){
+
         if(givenRow >= 0 && givenRow < GameFrame.ROW_LIMIT &&
-           givenCol >= 0 && givenCol < GameFrame.COL_LIMIT ){
+                givenCol >= 0 && givenCol < GameFrame.COL_LIMIT ){
 
             if(givenRow != this.currentRow || givenCol != this.currentCol){
 
-                this.initialRow = this.currentRow;
-                this.initialCol = this.currentCol;
+                initialRow = this.currentRow;
+                initialCol = this.currentCol;
 
-                while(this.movesPerformed < this.movementLimit){
+                isMoveValidWithHorizontalPrio(givenRow, givenCol, tileCollection);
 
-                    moveVertical(givenRow);
-                    if(this.movesPerformed < this.movementLimit) {
-                        moveHorizontal(givenCol);
-                    }
-                    if((givenRow == this.currentRow && givenCol == this.currentCol)){
-                        this.movesPerformed = 0;
+                if(this.result){
+                    return true;
+                }
+                else {
+                    isMoveValidWithVerticalPrio(givenRow, givenCol, tileCollection);
+
+                    if (this.result) {
                         return true;
                     }
-                    if(this.movesPerformed == this.movementLimit){
-                        this.movesPerformed = 0;
-                        this.currentRow = this.initialRow;
-                        this.currentCol = this.initialCol;
-                        return false;
-                    }
                 }
+
+                this.currentRow = initialRow;
+                this.currentCol = initialCol;
+                this.result = false;
+                return false;
             }
             return false;
         }

@@ -2,8 +2,9 @@ package pieces;
 
 public class Knight extends Piece {
 
-    public Knight(int currentRow, int currentCol, String team){
+    public Knight(int currentRow, int currentCol, String team, String type){
 
+        this.pieceType = type;
         this.team = team;
         this.currentRow = currentRow;
         this.currentCol = currentCol;

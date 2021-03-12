@@ -3,11 +3,16 @@ package gameComponents;
 import pieces.Dwarf;
 import pieces.Elf;
 import pieces.Knight;
+import pieces.Stone;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Random;
 
 public class GameFrame extends JFrame implements MouseListener{
 
@@ -16,6 +21,7 @@ public class GameFrame extends JFrame implements MouseListener{
     private final int BOARD_WIDTH     = 900;
     private final int NULL            = 0;
     private boolean arePiecesPlaced   = false;
+    private boolean isTileSelected    = false;
 
     public static final int TILE_SIZE = 100;
     public static final int ROW_LIMIT = 7;
@@ -24,7 +30,12 @@ public class GameFrame extends JFrame implements MouseListener{
     private final Tile[][] tileCollection = new Tile[ROW_LIMIT][COL_LIMIT];
     private Tile selectedTile;
     private Tile initialTile;
-
+    private Random random = new Random();
+    private final int totalStonesLimit = 5;
+    private final int currentStonesLimit = random.nextInt(totalStonesLimit - 1) + 1;
+    private       int stonesPlaced;
+    private int initialRow;
+    private int initialCol;
     public GameFrame(){
 
         this.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
@@ -34,6 +45,56 @@ public class GameFrame extends JFrame implements MouseListener{
         this.addMouseListener(this);
     }
 
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+        int selectedRow = e.getY() / TILE_SIZE;
+        int selectedCol = e.getX() / TILE_SIZE;
+
+        if(this.selectedTile != null){
+
+            if(this.tileCollection[selectedRow][selectedCol].getPiece() == null){
+
+                if(this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+
+                    movement(selectedRow, selectedCol);
+                    this.repaint();
+                    return;
+                }
+            }
+        }
+
+        if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece() != null){
+
+            this.selectedTile = tileCollection[selectedRow][selectedCol];
+            this.initialTile = selectedTile;
+            isTileSelected = true;
+            repaint();
+
+        }
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
 
     @Override
     public void paint(Graphics g){
@@ -46,10 +107,13 @@ public class GameFrame extends JFrame implements MouseListener{
             placePieces();
         }
 
+        if(isTileSelected){
+            checkPossibilities(g);
+        }
+
         renderPieces(g);
         renderTiledGrid(g);
     }
-
     private void renderTiles(Graphics g){
 
         for(int row = NULL; row < ROW_LIMIT; row++) {
@@ -98,71 +162,72 @@ public class GameFrame extends JFrame implements MouseListener{
         }
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
 
-        int selectedRow = e.getY() / TILE_SIZE;
-        int selectedCol = e.getX() / TILE_SIZE;
+    private void checkPossibilities(Graphics g){
 
-        if(this.selectedTile != null){
+        if(initialTile.getPiece() != null) {
 
-            if(this.tileCollection[selectedRow][selectedCol].getPiece() == null){
+            for (int row = 0; row < ROW_LIMIT; row++) {
 
-                if(this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol)){
+                for (int col = 0; col < COL_LIMIT; col++) {
 
-                    movement(selectedRow, selectedCol);
-                    this.repaint();
-                    return;
+                    if (this.initialTile.getPiece().isMoveValid(row, col, this.tileCollection)) {
+
+                        try{
+                            BufferedImage icon = ImageIO.read(getClass().getResourceAsStream("/resources/images/greenX.jpg"));
+                            g.drawImage(icon, col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE, null);
+
+                        }
+                        catch(IOException e){
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
+            isTileSelected = false;
         }
-
-        if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece() != null){
-
-            this.selectedTile = tileCollection[selectedRow][selectedCol];
-            this.initialTile = selectedTile;
-        }
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
     }
 
     private void placePieces(){
 
-        this.tileCollection[0][0].setPiece(new Elf(0,0, "RED"));
-        this.tileCollection[0][1].setPiece(new Dwarf(0,1, "RED"));
-        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED"));
-        this.tileCollection[1][0].setPiece(new Elf(1,0, "RED"));
-        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED"));
-        this.tileCollection[1][2].setPiece(new Knight(1,2, "RED"));
+        this.tileCollection[1][3].setPiece(new Elf(1,3, "RED", "ELF"));
+        this.tileCollection[1][5].setPiece(new Elf(1,5, "RED", "ELF"));
+        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED", "DWARF"));
+        this.tileCollection[1][7].setPiece(new Dwarf(1,7, "RED", "DWARF"));
+        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED", "KNIGHT"));
+        this.tileCollection[0][6].setPiece(new Knight(0,6, "RED", "KNIGHT"));
+
+        this.tileCollection[5][3].setPiece(new Elf(5,3, "GREEN", "ELF"));
+        this.tileCollection[5][5].setPiece(new Elf(5,5, "GREEN", "ELF"));
+        this.tileCollection[5][1].setPiece(new Dwarf(5,1, "GREEN", "DWARF"));
+        this.tileCollection[5][7].setPiece(new Dwarf(5,7, "GREEN", "DWARF"));
+        this.tileCollection[6][2].setPiece(new Knight(6,2, "GREEN", "KNIGHT"));
+        this.tileCollection[6][6].setPiece(new Knight(6,6, "GREEN", "KNIGHT"));
+
+        while(stonesPlaced < currentStonesLimit){
+            int row = random.nextInt(3) + 2;
+            int col = random.nextInt(9);
+            if(this.tileCollection[row][col].getPiece() == null){
+                this.tileCollection[row][col].setPiece(new Stone(row, col));
+                stonesPlaced ++;
+            }
+        }
+
         this.arePiecesPlaced = true;
     }
 
     public void movement(int givenRow, int givenCol){
 
-            this.tileCollection[givenRow][givenCol].setPiece(this.initialTile.getPiece());
+        String team = initialTile.getPiece().getTeam();
 
-            this.initialTile.setPiece(null);
-            this.selectedTile = null;
-            this.initialTile = null;
-
+        switch (this.initialTile.getPiece().getPieceType()) {
+            case "KNIGHT" -> this.tileCollection[givenRow][givenCol].setPiece(new Knight(givenRow, givenCol, team, "KNIGHT"));
+            case "ELF" -> this.tileCollection[givenRow][givenCol].setPiece(new Elf(givenRow, givenCol, team, "ELF"));
+            case "DWARF" -> this.tileCollection[givenRow][givenCol].setPiece(new Dwarf(givenRow, givenCol, team, "DWARF"));
+        }
+        this.initialTile.setPiece(null);
+        this.initialTile = null;
+        this.selectedTile.setPiece(null);
+        this.selectedTile = null;
     }
 }

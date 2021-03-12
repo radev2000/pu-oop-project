@@ -9,6 +9,6 @@ public class Stone extends Piece{
         this.currentCol = currentCol;
         this.team = team;
         this.setHp(1);
-        this.setArmor(0);
+        this.setArmor(4);
     }
 }

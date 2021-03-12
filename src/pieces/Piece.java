@@ -14,6 +14,7 @@ public abstract class Piece {
     protected int dmg;
     protected int armor;
     protected int hp;
+    protected int maxHP;
     protected int movementLimit;
     protected int attackRange;
     protected String pieceType;
@@ -28,6 +29,7 @@ public abstract class Piece {
     protected String team;
     private int loops;
     private boolean moveResult = false;
+    private boolean hasPotion = true;
 
 
     public void render(Graphics g) {
@@ -57,6 +59,7 @@ public abstract class Piece {
     public void setPieceType(String pieceType) {
         this.pieceType = pieceType;
     }
+
 
     public void setCurrentRow(int currentRow) {
         this.currentRow = currentRow;
@@ -115,6 +118,9 @@ public abstract class Piece {
     public int getHp() {
         return hp;
     }
+
+
+    public int getMaxHP(){ return maxHP; }
 
 
     public int getMovementLimit() {
@@ -298,12 +304,12 @@ public abstract class Piece {
         if(tileCollection[givenRow][givenCol].getPiece() != null) {
             if (GameFrame.isGreenPlayerTurn) {
                 if (!tileCollection[givenRow][givenCol].getPiece().getTeam().equals("GREEN")) {
-                    return getAttackResult(givenRow, givenCol, attackerTile);
+                    return getAttackResult(givenRow, givenCol, tileCollection, attackerTile);
                 }
             }
             if (!GameFrame.isGreenPlayerTurn) {
                 if (!tileCollection[givenRow][givenCol].getPiece().getTeam().equals("RED")) {
-                    return getAttackResult(givenRow, givenCol, attackerTile);
+                    return getAttackResult(givenRow, givenCol, tileCollection, attackerTile);
                 }
             }
         }
@@ -311,25 +317,44 @@ public abstract class Piece {
     }
 
 
-    private boolean getAttackResult(int attackedRow, int attackedCol, Tile attackerTile){
+    private boolean getAttackResult(int attackedRow, int attackedCol, Tile[][] tileCollection, Tile attackerTile){
 
         int attackerRow = attackerTile.getRowIndex();
         int attackerCol = attackerTile.getColIndex();
 
+        // Vertical attack
         if(attackerCol == attackedCol){
-            if(attackerRow - attackedRow == attackerTile.getPiece().getAttackRange()){
+            if(attackerRow - attackedRow == attackerTile.getPiece().getAttackRange() &&
+                    (tileCollection[attackerRow - 1][attackerCol].getPiece() == null  ||
+                    attackerTile.getPiece().getPieceType().equals("ELF"))){
                 return true;
             }
-            if(attackerRow - attackedRow == - attackerTile.getPiece().getAttackRange()){
+            if(attackerRow - attackedRow == - attackerTile.getPiece().getAttackRange() &&
+                    (tileCollection[attackerRow + 1][attackerCol].getPiece() == null  ||
+                    attackerTile.getPiece().getPieceType().equals("ELF"))){
                 return true;
             }
         }
+        // Horizontal attack
         if(attackerRow == attackedRow){
-            if(attackerCol - attackedCol == attackerTile.getPiece().getAttackRange()){
+            if(attackerCol - attackedCol == attackerTile.getPiece().getAttackRange() &&
+                    (tileCollection[attackerRow + 1][attackerCol].getPiece() == null  ||
+                            attackerTile.getPiece().getPieceType().equals("ELF"))){
                 return true;
             }
-            return attackerCol - attackedCol == -attackerTile.getPiece().getAttackRange();
+            return attackerCol - attackedCol == -attackerTile.getPiece().getAttackRange() &&
+                    (tileCollection[attackerRow + 1][attackerCol].getPiece() == null  ||
+                            attackerTile.getPiece().getPieceType().equals("ELF"));
         }
         return false;
+    }
+
+    public boolean getPotion(){
+        return this.hasPotion;
+    }
+
+
+    public void potionUsed(){
+        this.hasPotion = false;
     }
 }

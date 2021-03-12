@@ -4,6 +4,7 @@ public class Elf extends Piece {
 
     public Elf(int currentRow, int currentCol, String team, String type, int hp){
 
+        this.maxHP = 10;
         this.hp = hp;
         this.pieceType = type;
         this.team = team;

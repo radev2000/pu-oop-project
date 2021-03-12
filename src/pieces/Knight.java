@@ -4,6 +4,7 @@ public class Knight extends Piece {
 
     public Knight(int currentRow, int currentCol, String team, String type, int hp){
 
+        this.maxHP = 15;
         this.hp = hp;
         this.armor = 3;
         this.dmg = 8;

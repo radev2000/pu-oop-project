@@ -5,6 +5,7 @@ public class Dwarf extends Piece {
     public Dwarf(int currentRow, int currentCol, String team, String type, int hp){
 
         this.hp = hp;
+        this.maxHP = 12;
         this.pieceType = type;
         this.team = team;
         this.currentRow = currentRow;

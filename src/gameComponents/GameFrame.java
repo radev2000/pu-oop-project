@@ -22,6 +22,10 @@ public class GameFrame extends JFrame implements MouseListener{
     private final int NULL            = 0;
     private boolean arePiecesPlaced   = false;
     private boolean isTileSelected    = false;
+    private boolean isGreenPlayerTurn = true;
+
+    private int greenPiecesLeft = 4;
+    private int redPiecesLeft = 4;
 
     public static final int TILE_SIZE = 100;
     public static final int ROW_LIMIT = 7;
@@ -52,29 +56,81 @@ public class GameFrame extends JFrame implements MouseListener{
         int selectedRow = e.getY() / TILE_SIZE;
         int selectedCol = e.getX() / TILE_SIZE;
 
-        if(this.selectedTile != null){
+        if(isGameRunning()){
 
-            if(this.tileCollection[selectedRow][selectedCol].getPiece() == null){
+            greenTurn(selectedRow, selectedCol);
 
-                if(this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+            redTurn(selectedRow, selectedCol);
+        }
+    }
+
+    private void greenTurn(int selectedRow, int selectedCol){
+
+        if(isGreenPlayerTurn){
+
+            if(this.selectedTile != null){
+
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
+                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
 
                     movement(selectedRow, selectedCol);
                     this.repaint();
+                    this.isGreenPlayerTurn = false;
                     return;
                 }
             }
-        }
-
-        if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece() != null){
-
-            this.selectedTile = tileCollection[selectedRow][selectedCol];
-            this.initialTile = selectedTile;
-            isTileSelected = true;
-            repaint();
+            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("GREEN")){
+                selectPiece(selectedRow, selectedCol);
+                return;
+            }
 
         }
-
     }
+
+    private void redTurn(int selectedRow, int selectedCol){
+
+        if(!isGreenPlayerTurn){
+
+            if(this.selectedTile != null){
+
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
+                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+
+                    movement(selectedRow, selectedCol);
+                    this.repaint();
+                    this.isGreenPlayerTurn = true;
+                    return;
+                }
+            }
+            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("RED")){
+                selectPiece(selectedRow, selectedCol);
+                return;
+            }
+        }
+    }
+
+
+    private void selectPiece(int selectedRow, int selectedCol){
+
+        this.selectedTile = tileCollection[selectedRow][selectedCol];
+        this.initialTile = selectedTile;
+        isTileSelected = true;
+        repaint();
+    }
+
+    private boolean isGameRunning(){
+
+        if(greenPiecesLeft < 0){
+            System.out.println("Red Player Won!");
+            return false;
+        }
+        if(redPiecesLeft < 0){
+            System.out.println("Green Player Won!");
+            return false;
+        }
+        return true;
+    }
+
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -114,6 +170,8 @@ public class GameFrame extends JFrame implements MouseListener{
         renderPieces(g);
         renderTiledGrid(g);
     }
+
+
     private void renderTiles(Graphics g){
 
         for(int row = NULL; row < ROW_LIMIT; row++) {
@@ -138,6 +196,7 @@ public class GameFrame extends JFrame implements MouseListener{
         }
     }
 
+
     private void renderPieces(Graphics g){
 
         for (Tile[] tiles : this.tileCollection) {
@@ -151,6 +210,7 @@ public class GameFrame extends JFrame implements MouseListener{
             }
         }
     }
+
 
     private void renderTiledGrid(Graphics g){
 
@@ -188,6 +248,7 @@ public class GameFrame extends JFrame implements MouseListener{
         }
     }
 
+
     private void placePieces(){
 
         this.tileCollection[1][3].setPiece(new Elf(1,3, "RED", "ELF"));
@@ -216,18 +277,19 @@ public class GameFrame extends JFrame implements MouseListener{
         this.arePiecesPlaced = true;
     }
 
+
     public void movement(int givenRow, int givenCol){
 
-        String team = initialTile.getPiece().getTeam();
+            String team = initialTile.getPiece().getTeam();
 
-        switch (this.initialTile.getPiece().getPieceType()) {
-            case "KNIGHT" -> this.tileCollection[givenRow][givenCol].setPiece(new Knight(givenRow, givenCol, team, "KNIGHT"));
-            case "ELF" -> this.tileCollection[givenRow][givenCol].setPiece(new Elf(givenRow, givenCol, team, "ELF"));
-            case "DWARF" -> this.tileCollection[givenRow][givenCol].setPiece(new Dwarf(givenRow, givenCol, team, "DWARF"));
-        }
-        this.initialTile.setPiece(null);
-        this.initialTile = null;
-        this.selectedTile.setPiece(null);
-        this.selectedTile = null;
+            switch (this.initialTile.getPiece().getPieceType()) {
+                case "KNIGHT" -> this.tileCollection[givenRow][givenCol].setPiece(new Knight(givenRow, givenCol, team, "KNIGHT"));
+                case "ELF" -> this.tileCollection[givenRow][givenCol].setPiece(new Elf(givenRow, givenCol, team, "ELF"));
+                case "DWARF" -> this.tileCollection[givenRow][givenCol].setPiece(new Dwarf(givenRow, givenCol, team, "DWARF"));
+            }
+            this.initialTile.setPiece(null);
+            this.initialTile = null;
+            this.selectedTile.setPiece(null);
+            this.selectedTile = null;
     }
 }

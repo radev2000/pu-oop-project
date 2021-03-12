@@ -21,15 +21,19 @@ public abstract class Piece {
     public static int initialCol;
     protected int currentRow;
     protected int currentCol;
+    private   int coordinatesSum;
+    private   int givenSum;
     protected int movesPerformed;
     protected String imageSource;
     protected String team;
     private int loops;
     private boolean result = false;
 
+
     public String getPieceType() {
         return pieceType;
     }
+
 
     public void setPieceType(String pieceType) {
         this.pieceType = pieceType;
@@ -69,29 +73,36 @@ public abstract class Piece {
         this.armor = armor;
     }
 
+
     public int getHp() {
         return hp;
     }
+
 
     protected void setHp(int hp) {
         this.hp = hp;
     }
 
+
     public int getMovementLimit() {
         return movementLimit;
     }
+
 
     protected void setMovementLimit(int movementLimit) {
         this.movementLimit = movementLimit;
     }
 
+
     public int getAttackRange() {
         return attackRange;
     }
 
+
     protected void setAttackRange(int attackRange) {
         this.attackRange = attackRange;
     }
+
 
     private String getMovementHorizontalDirection(int givenCol) {
         if (givenCol < this.currentCol) {
@@ -102,6 +113,7 @@ public abstract class Piece {
         return "CURRENT";
     }
 
+
     private String getMovementVerticalDirection(int givenRow) {
         if (givenRow < this.currentRow) {
             return "UP";
@@ -110,6 +122,7 @@ public abstract class Piece {
         }
         return "CURRENT";
     }
+
 
     private void moveHorizontal(int givenCol, Tile[][] tileCollection) {
 
@@ -125,6 +138,7 @@ public abstract class Piece {
         }
     }
 
+
     private void moveVertical(int givenRow, Tile[][] tileCollection) {
 
         if (getMovementVerticalDirection(givenRow).equals("UP") &&
@@ -137,6 +151,7 @@ public abstract class Piece {
             movesPerformed++;
         }
     }
+
 
     private void isMoveValidWithVerticalPrio(int givenRow, int givenCol, Tile[][] tileCollection) {
 
@@ -173,6 +188,7 @@ public abstract class Piece {
 
     }
 
+
     private void isMoveValidWithHorizontalPrio(int givenRow, int givenCol, Tile[][] tileCollection) {
 
         while (this.movesPerformed < this.movementLimit && loops < 5) {
@@ -207,38 +223,51 @@ public abstract class Piece {
         }
     }
 
+
     public boolean isMoveValid(int givenRow, int givenCol, Tile[][] tileCollection){
 
-        if(givenRow >= 0 && givenRow < GameFrame.ROW_LIMIT &&
-                givenCol >= 0 && givenCol < GameFrame.COL_LIMIT ){
+        if(movePreValidator(givenRow, givenCol)) {
+            if (givenRow >= 0 && givenRow < GameFrame.ROW_LIMIT &&
+                    givenCol >= 0 && givenCol < GameFrame.COL_LIMIT) {
 
-            if(givenRow != this.currentRow || givenCol != this.currentCol){
+                if (givenRow != this.currentRow || givenCol != this.currentCol) {
 
-                initialRow = this.currentRow;
-                initialCol = this.currentCol;
-
-                isMoveValidWithHorizontalPrio(givenRow, givenCol, tileCollection);
-
-                if(this.result){
-                    return true;
-                }
-                else {
-                    isMoveValidWithVerticalPrio(givenRow, givenCol, tileCollection);
-
+                    initialRow = this.currentRow;
+                    initialCol = this.currentCol;
+                    isMoveValidWithHorizontalPrio(givenRow, givenCol, tileCollection);
                     if (this.result) {
                         return true;
+                    } else {
+                        isMoveValidWithVerticalPrio(givenRow, givenCol, tileCollection);
+                        if (this.result) {
+                            return true;
+                        }
                     }
-                }
 
-                this.currentRow = initialRow;
-                this.currentCol = initialCol;
-                this.result = false;
+                    this.currentRow = initialRow;
+                    this.currentCol = initialCol;
+                    this.result = false;
+                    return false;
+                }
                 return false;
             }
             return false;
         }
         return false;
     }
+
+
+    private boolean movePreValidator(int givenRow, int givenCol){
+
+        this.coordinatesSum = this.currentRow + this.currentCol;
+        this.givenSum = givenRow + givenCol;
+        if(givenSum - this.coordinatesSum <= 3 ||
+           givenSum - this.coordinatesSum >= 3 ){
+            return true;
+        }
+        return false;
+    }
+
 
     public void render(Graphics g) {
 

@@ -24,8 +24,8 @@ public class GameFrame extends JFrame implements MouseListener{
     private boolean isTileSelected    = false;
     public static boolean isGreenPlayerTurn = true;
 
-    private int greenPiecesLeft = 4;
-    private int redPiecesLeft = 4;
+    private int greenPiecesLeft = 6;
+    private int redPiecesLeft = 6;
 
     public static final int TILE_SIZE = 100;
     public static final int ROW_LIMIT = 7;
@@ -62,74 +62,6 @@ public class GameFrame extends JFrame implements MouseListener{
 
             redTurn(selectedRow, selectedCol);
         }
-    }
-
-    private void greenTurn(int selectedRow, int selectedCol){
-
-        if(isGreenPlayerTurn){
-
-            if(this.selectedTile != null){
-
-                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
-                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
-
-                    movement(selectedRow, selectedCol);
-                    this.repaint();
-                    isGreenPlayerTurn = false;
-                    return;
-                }
-                if(this.tileCollection[selectedRow][selectedCol].getPiece() != null &&
-                   this.initialTile.getPiece().isAttackValid(selectedRow, selectedCol, tileCollection, initialTile)){
-                    System.out.println("ATTACK");
-                }
-            }
-            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("GREEN")){
-                selectPiece(selectedRow, selectedCol);
-            }
-        }
-    }
-
-    private void redTurn(int selectedRow, int selectedCol){
-
-        if(!isGreenPlayerTurn){
-
-            if(this.selectedTile != null){
-
-                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
-                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
-
-                    movement(selectedRow, selectedCol);
-                    this.repaint();
-                    isGreenPlayerTurn = true;
-                    return;
-                }
-            }
-            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("RED")){
-                selectPiece(selectedRow, selectedCol);
-            }
-        }
-    }
-
-
-    private void selectPiece(int selectedRow, int selectedCol){
-
-        this.selectedTile = tileCollection[selectedRow][selectedCol];
-        this.initialTile = selectedTile;
-        isTileSelected = true;
-        repaint();
-    }
-
-    private boolean isGameRunning(){
-
-        if(greenPiecesLeft < 0){
-            System.out.println("Red Player Won!");
-            return false;
-        }
-        if(redPiecesLeft < 0){
-            System.out.println("Green Player Won!");
-            return false;
-        }
-        return true;
     }
 
 
@@ -243,6 +175,16 @@ public class GameFrame extends JFrame implements MouseListener{
                             e.printStackTrace();
                         }
                     }
+                    if(this.initialTile.getPiece().isAttackValid(row,col, this.tileCollection,this.initialTile)){
+                        try{
+                            BufferedImage icon = ImageIO.read(getClass().getResourceAsStream("/resources/images/redX.png"));
+                            g.drawImage(icon, col * TILE_SIZE, row * TILE_SIZE, TILE_SIZE, TILE_SIZE, null);
+
+                        }
+                        catch(IOException e){
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
             isTileSelected = false;
@@ -252,41 +194,154 @@ public class GameFrame extends JFrame implements MouseListener{
 
     private void placePieces(){
 
-        this.tileCollection[1][3].setPiece(new Elf(1,3, "RED", "ELF"));
-        this.tileCollection[1][5].setPiece(new Elf(1,5, "RED", "ELF"));
-        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED", "DWARF"));
-        this.tileCollection[1][7].setPiece(new Dwarf(1,7, "RED", "DWARF"));
-        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED", "KNIGHT"));
-        this.tileCollection[0][6].setPiece(new Knight(0,6, "RED", "KNIGHT"));
-
-        this.tileCollection[5][3].setPiece(new Elf(5,3, "GREEN", "ELF"));
-        this.tileCollection[5][5].setPiece(new Elf(5,5, "GREEN", "ELF"));
-        this.tileCollection[5][1].setPiece(new Dwarf(5,1, "GREEN", "DWARF"));
-        this.tileCollection[5][7].setPiece(new Dwarf(5,7, "GREEN", "DWARF"));
-        this.tileCollection[6][2].setPiece(new Knight(6,2, "GREEN", "KNIGHT"));
-        this.tileCollection[6][6].setPiece(new Knight(6,6, "GREEN", "KNIGHT"));
-
         while(stonesPlaced < currentStonesLimit){
             int row = random.nextInt(3) + 2;
             int col = random.nextInt(9);
             if(this.tileCollection[row][col].getPiece() == null){
-                this.tileCollection[row][col].setPiece(new Stone(row, col));
+                this.tileCollection[row][col].setPiece(new Stone(row, col, "NEUTRAL"));
                 stonesPlaced ++;
             }
         }
 
+        this.tileCollection[1][3].setPiece(new Elf(1,3, "RED", "ELF", 10));
+        this.tileCollection[1][5].setPiece(new Elf(1,5, "RED", "ELF", 10));
+        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED", "DWARF", 12));
+        this.tileCollection[1][7].setPiece(new Dwarf(1,7, "RED", "DWARF", 12));
+        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED", "KNIGHT", 15));
+        this.tileCollection[0][6].setPiece(new Knight(0,6, "RED", "KNIGHT", 15));
+
+        this.tileCollection[5][3].setPiece(new Elf(5,3, "GREEN", "ELF", 1));
+        this.tileCollection[5][5].setPiece(new Elf(5,5, "GREEN", "ELF", 1));
+        this.tileCollection[5][1].setPiece(new Dwarf(5,1, "GREEN", "DWARF", 1));
+        this.tileCollection[5][7].setPiece(new Dwarf(5,7, "GREEN", "DWARF", 1));
+        this.tileCollection[6][2].setPiece(new Knight(6,2, "GREEN", "KNIGHT", 1));
+        this.tileCollection[6][6].setPiece(new Knight(6,6, "GREEN", "KNIGHT", 1));
+
         this.arePiecesPlaced = true;
+    }
+
+
+    private void greenTurn(int selectedRow, int selectedCol){
+
+        if(isGreenPlayerTurn){
+
+            if(this.selectedTile != null){
+
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
+                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+
+                    movement(selectedRow, selectedCol);
+                    this.repaint();
+                    isGreenPlayerTurn = false;
+                    return;
+                }
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() != null &&
+                        this.initialTile.getPiece().isAttackValid(selectedRow, selectedCol, tileCollection, initialTile)){
+                    attack(selectedRow, selectedCol);
+                    isGreenPlayerTurn = false;
+                    return;
+                }
+            }
+            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("GREEN")){
+                selectPiece(selectedRow, selectedCol);
+            }
+        }
+    }
+
+
+    private void redTurn(int selectedRow, int selectedCol){
+
+        if(!isGreenPlayerTurn){
+
+            if(this.selectedTile != null){
+
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
+                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+
+                    movement(selectedRow, selectedCol);
+                    this.repaint();
+                    isGreenPlayerTurn = true;
+                    return;
+                }
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() != null &&
+                        this.initialTile.getPiece().isAttackValid(selectedRow, selectedCol, tileCollection, initialTile)){
+                    attack(selectedRow, selectedCol);
+                    isGreenPlayerTurn = true;
+                    return;
+                }
+            }
+            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("RED")){
+                selectPiece(selectedRow, selectedCol);
+            }
+        }
+    }
+
+
+    private void selectPiece(int selectedRow, int selectedCol){
+
+        this.selectedTile = tileCollection[selectedRow][selectedCol];
+        this.initialTile = selectedTile;
+        isTileSelected = true;
+        repaint();
+    }
+
+
+    private boolean isGameRunning(){
+
+        if(greenPiecesLeft <= 0){
+            System.out.println("Red Player Won!");
+            return false;
+        }
+        if(redPiecesLeft <= 0){
+            System.out.println("Green Player Won!");
+            return false;
+        }
+        return true;
+    }
+
+
+    private void destroyDeadPiece(int row, int col){
+
+        if (this.tileCollection[row][col].getPiece().getHp() <= 0){
+
+            if(this.tileCollection[row][col].getPiece().getTeam().equals("GREEN")){
+                this.greenPiecesLeft--;
+            }
+            else if (this.tileCollection[row][col].getPiece().getTeam().equals("RED")){
+            this.redPiecesLeft--;
+            }
+            this.tileCollection[row][col].setPiece(null);
+            repaint();
+        }
+    }
+
+
+    private void attack(int givenRow, int givenCol){
+
+        int dmgDealt = this.initialTile.getPiece().getDmg() - this.tileCollection[givenRow][givenCol].getPiece().getArmor();
+        int hpLeft = this.tileCollection[givenRow][givenCol].getPiece().getHp() - dmgDealt;
+
+        this.tileCollection[givenRow][givenCol].getPiece().setHp(hpLeft);
+
+        System.out.println("ATTACK");
+        System.out.println("DMG Dealt " + dmgDealt);
+        System.out.println("HP Left " + hpLeft);
+
+        this.initialTile = null;
+        this.selectedTile = null;
+        destroyDeadPiece(givenRow, givenCol);
     }
 
 
     public void movement(int givenRow, int givenCol){
 
             String team = initialTile.getPiece().getTeam();
+            int currentHP = initialTile.getPiece().getHp();
 
             switch (this.initialTile.getPiece().getPieceType()) {
-                case "KNIGHT" -> this.tileCollection[givenRow][givenCol].setPiece(new Knight(givenRow, givenCol, team, "KNIGHT"));
-                case "ELF" -> this.tileCollection[givenRow][givenCol].setPiece(new Elf(givenRow, givenCol, team, "ELF"));
-                case "DWARF" -> this.tileCollection[givenRow][givenCol].setPiece(new Dwarf(givenRow, givenCol, team, "DWARF"));
+                case "KNIGHT" -> this.tileCollection[givenRow][givenCol].setPiece(new Knight(givenRow, givenCol, team, "KNIGHT", currentHP));
+                case "ELF" -> this.tileCollection[givenRow][givenCol].setPiece(new Elf(givenRow, givenCol, team, "ELF", currentHP));
+                case "DWARF" -> this.tileCollection[givenRow][givenCol].setPiece(new Dwarf(givenRow, givenCol, team, "DWARF", currentHP));
             }
             this.initialTile.setPiece(null);
             this.initialTile = null;

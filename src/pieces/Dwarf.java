@@ -2,8 +2,9 @@ package pieces;
 
 public class Dwarf extends Piece {
 
-    public Dwarf(int currentRow, int currentCol, String team, String type){
+    public Dwarf(int currentRow, int currentCol, String team, String type, int hp){
 
+        this.hp = hp;
         this.pieceType = type;
         this.team = team;
         this.currentRow = currentRow;
@@ -15,10 +16,9 @@ public class Dwarf extends Piece {
             this.imageSource = "/resources/images/dwarfG.gif";
         }
 
-        setDmg(6);
-        setArmor(2);
-        setHp(12);
-        setMovementLimit(2);
-        setAttackRange(2);
+        this.setDmg(6);
+        this.setArmor(2);
+        this.setMovementLimit(2);
+        this.setAttackRange(2);
     }
 }

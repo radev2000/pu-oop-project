@@ -2,8 +2,11 @@ package pieces;
 
 public class Knight extends Piece {
 
-    public Knight(int currentRow, int currentCol, String team, String type){
+    public Knight(int currentRow, int currentCol, String team, String type, int hp){
 
+        this.hp = hp;
+        this.armor = 3;
+        this.dmg = 8;
         this.pieceType = type;
         this.team = team;
         this.currentRow = currentRow;
@@ -15,10 +18,8 @@ public class Knight extends Piece {
             this.imageSource = "/resources/images/knightG.png";
         }
 
-        setDmg(8);
-        setArmor(3);
-        setHp(15);
-        setMovementLimit(1);
-        setAttackRange(1);
+
+        this.setMovementLimit(1);
+        this.setAttackRange(1);
     }
 }

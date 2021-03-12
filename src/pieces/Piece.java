@@ -49,6 +49,11 @@ public abstract class Piece {
     //// SETTERS ////
 
 
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+
     public void setPieceType(String pieceType) {
         this.pieceType = pieceType;
     }
@@ -70,11 +75,6 @@ public abstract class Piece {
 
     protected void setDmg(int dmg) {
         this.dmg = dmg;
-    }
-
-
-    protected void setHp(int hp) {
-        this.hp = hp;
     }
 
 
@@ -291,18 +291,20 @@ public abstract class Piece {
                 givenSum - this.coordinatesSum >= 3;
     }
 
-    //// COMBAT ////
+    //// ATTACK ////
 
     public boolean isAttackValid(int givenRow, int givenCol, Tile[][] tileCollection, Tile attackerTile){
 
-        if(GameFrame.isGreenPlayerTurn) {
-            if (tileCollection[givenRow][givenCol].getPiece().getTeam().equals("RED")){
-                return getAttackResult(givenRow, givenCol, attackerTile);
+        if(tileCollection[givenRow][givenCol].getPiece() != null) {
+            if (GameFrame.isGreenPlayerTurn) {
+                if (!tileCollection[givenRow][givenCol].getPiece().getTeam().equals("GREEN")) {
+                    return getAttackResult(givenRow, givenCol, attackerTile);
+                }
             }
-        }
-        if(GameFrame.isGreenPlayerTurn = false) {
-            if (tileCollection[givenRow][givenCol].getPiece().getTeam().equals("GREEN")){
-                return getAttackResult(givenRow, givenCol, attackerTile);
+            if (!GameFrame.isGreenPlayerTurn) {
+                if (!tileCollection[givenRow][givenCol].getPiece().getTeam().equals("RED")) {
+                    return getAttackResult(givenRow, givenCol, attackerTile);
+                }
             }
         }
         return false;

@@ -2,8 +2,9 @@ package pieces;
 
 public class Elf extends Piece {
 
-    public Elf(int currentRow, int currentCol, String team, String type){
+    public Elf(int currentRow, int currentCol, String team, String type, int hp){
 
+        this.hp = hp;
         this.pieceType = type;
         this.team = team;
         this.currentRow = currentRow;
@@ -15,10 +16,9 @@ public class Elf extends Piece {
             this.imageSource = "/resources/images/elfG.png";
         }
 
-        setDmg(5);
-        setArmor(1);
-        setHp(10);
-        setMovementLimit(3);
-        setAttackRange(3);
+        this.setDmg(5);
+        this.setArmor(1);
+        this.setMovementLimit(3);
+        this.setAttackRange(3);
     }
 }

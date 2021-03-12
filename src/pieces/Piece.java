@@ -2,14 +2,16 @@ package pieces;
 
 import gameComponents.GameFrame;
 import gameComponents.Tile;
-
 import javax.imageio.ImageIO;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public abstract class Piece {
+
+
+    public static int initialRow;
+    public static int initialCol;
 
     protected int dmg;
     protected int armor;
@@ -17,16 +19,14 @@ public abstract class Piece {
     protected int maxHP;
     protected int movementLimit;
     protected int attackRange;
-    protected String pieceType;
-    public static int initialRow;
-    public static int initialCol;
     protected int currentRow;
     protected int currentCol;
-    private   int coordinatesSum;
-    private   int givenSum;
     protected int movesPerformed;
+
+    protected String pieceType;
     protected String imageSource;
     protected String team;
+
     private int loops;
     private boolean moveResult = false;
     private boolean hasPotion = true;
@@ -56,19 +56,19 @@ public abstract class Piece {
     }
 
 
-    public void setPieceType(String pieceType) {
-        this.pieceType = pieceType;
-    }
-
-
-    public void setCurrentRow(int currentRow) {
-        this.currentRow = currentRow;
-    }
-
-
-    public void setCurrentCol(int currentCol) {
-        this.currentCol = currentCol;
-    }
+//    public void setPieceType(String pieceType) {
+//        this.pieceType = pieceType;
+//    }
+//
+//
+//    public void setCurrentRow(int currentRow) {
+//        this.currentRow = currentRow;
+//    }
+//
+//
+//    public void setCurrentCol(int currentCol) {
+//        this.currentCol = currentCol;
+//    }
 
 
     protected void setArmor(int armor) {
@@ -122,10 +122,10 @@ public abstract class Piece {
 
     public int getMaxHP(){ return maxHP; }
 
-
-    public int getMovementLimit() {
-        return movementLimit;
-    }
+//
+//    public int getMovementLimit() {
+//        return movementLimit;
+//    }
 
 
     public int getAttackRange() {
@@ -291,10 +291,10 @@ public abstract class Piece {
 
     private boolean movePreValidator(int givenRow, int givenCol){
 
-        this.coordinatesSum = this.currentRow + this.currentCol;
-        this.givenSum = givenRow + givenCol;
-        return givenSum - this.coordinatesSum <= 3 ||
-                givenSum - this.coordinatesSum >= 3;
+        int coordinatesSum = this.currentRow + this.currentCol;
+        int givenSum = givenRow + givenCol;
+        return givenSum - coordinatesSum <= 3 ||
+                givenSum - coordinatesSum >= 3;
     }
 
     //// ATTACK ////

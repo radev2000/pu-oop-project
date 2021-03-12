@@ -13,34 +13,48 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Random;
 
 public class GameFrame extends JFrame implements MouseListener{
 
-    private final int SCREEN_WIDTH    = 1200;
-    private final int SCREEN_HEIGHT   = 700;
-    private final int BOARD_WIDTH     = 900;
-    private final int NULL            = 0;
-    private boolean arePiecesPlaced   = false;
-    private boolean isTileSelected    = false;
-    public static boolean isGreenPlayerTurn = true;
+    public static boolean isGreenPlayerTurn      = true;
 
-    private int greenPiecesLeft = 6;
-    private int redPiecesLeft = 6;
-
-    public static final int TILE_SIZE = 100;
-    public static final int ROW_LIMIT = 7;
-    public static final int COL_LIMIT = 9;
-
-    private final Tile[][] tileCollection = new Tile[ROW_LIMIT][COL_LIMIT];
-    private Tile selectedTile;
-    private Tile initialTile;
-    private Random random = new Random();
-    private final int totalStonesLimit = 5;
-    private final int currentStonesLimit = random.nextInt(totalStonesLimit - 1) + 1;
-    private       int stonesPlaced;
     public static int playerOnePoints;
     public static int playerTwoPoints;
+    public static int greenPiecesLeft            = 6;
+    public static int redPiecesLeft              = 6;
+    public static int rounds;
+
+    public static final int TILE_SIZE            = 100;
+    public static final int ROW_LIMIT            = 7;
+    public static final int COL_LIMIT            = 9;
+
+    private final Random random                  = new Random();
+
+    private       int stonesPlaced;
+    private final int totalStonesLimit           = 5;
+
+    private final int SCREEN_WIDTH               = 1200;
+    private final int SCREEN_HEIGHT              = 700;
+    private final int BOARD_WIDTH                = 900;
+    private final int NULL                       = 0;
+    private final int currentStonesLimit         = random.nextInt(totalStonesLimit - 1) + 1;
+    private final Tile[][] tileCollection        = new Tile[ROW_LIMIT][COL_LIMIT];
+
+    private boolean arePiecesPlaced              = false;
+    private boolean isTileSelected               = false;
+    private boolean isGameInPreparationMode      = true;
+    private Tile selectedTile;
+    private Tile initialTile;
+
+    public static Deque<String> greenPiecesQueue = new ArrayDeque<>();
+    public static Deque<String> redPiecesQueue   = new ArrayDeque<>();
+
+    private Color boardColor;
+
+
     public GameFrame(){
 
         this.setSize(SCREEN_WIDTH,SCREEN_HEIGHT);
@@ -51,7 +65,7 @@ public class GameFrame extends JFrame implements MouseListener{
         this.addMouseListener(this);
         this.setLocation(50, 50);
         this.setLayout(null);
-
+        this.setBackground(boardColor);
     }
 
 
@@ -65,15 +79,32 @@ public class GameFrame extends JFrame implements MouseListener{
         System.out.println("P2 : " + playerTwoPoints);
 
         unselect(selectedRow, selectedCol);
-        heal(selectedRow, selectedCol);
+        start(selectedRow, selectedCol);
 
-        if(isGameRunning()){
+        if(isGameRunning()) {
 
-            if(isGreenPlayerTurn) {
-                greenTurn(selectedRow, selectedCol);
-                return;
+            if (!isGameInPreparationMode) {
+
+                heal(selectedRow, selectedCol);
+
+                if (isGreenPlayerTurn) {
+                    greenTurn(selectedRow, selectedCol);
+                    return;
+                }
+                redTurn(selectedRow, selectedCol);
+                rounds++;
             }
-            redTurn(selectedRow, selectedCol);
+            else{
+                if (isGreenPlayerTurn) {
+                    greenPrepTurn(selectedRow, selectedCol);
+                    return;
+                }
+                redPrepTurn(selectedRow, selectedCol);
+            }
+            if (!isGameRunning()) {
+                this.dispose();
+                new FinalFrame();
+            }
         }
     }
 
@@ -83,20 +114,24 @@ public class GameFrame extends JFrame implements MouseListener{
 
     }
 
+
     @Override
     public void mouseReleased(MouseEvent e) {
 
     }
+
 
     @Override
     public void mouseEntered(MouseEvent e) {
 
     }
 
+
     @Override
     public void mouseExited(MouseEvent e) {
 
     }
+
 
     @Override
     public void paint(Graphics g){
@@ -107,15 +142,18 @@ public class GameFrame extends JFrame implements MouseListener{
 
             placePieces();
         }
-
         try{
-
+            if(isGameInPreparationMode) {
+                BufferedImage startButton = ImageIO.read(getClass().getResourceAsStream("/resources/images/startButton.png"));
+                g.drawImage(startButton, 925, 600, 250, 100, null);
+            }
             BufferedImage healButton = ImageIO.read(getClass().getResourceAsStream("/resources/images/healButton.png"));
             g.drawImage(healButton, 925, 435, 250, 250, null);
 
             BufferedImage unselectButton = ImageIO.read(getClass().getResourceAsStream("/resources/images/unselectButton.png"));
             g.drawImage(unselectButton, 925, 335, 250, 250, null);
         }
+
         catch(IOException e){
             e.printStackTrace();
         }
@@ -132,6 +170,7 @@ public class GameFrame extends JFrame implements MouseListener{
         }
     }
 
+
     private void showStats(Graphics g){
 
         if(selectedTile.getPiece() != null) {
@@ -143,6 +182,7 @@ public class GameFrame extends JFrame implements MouseListener{
 
         }
     }
+
 
     private void renderTiles(Graphics g){
 
@@ -208,7 +248,7 @@ public class GameFrame extends JFrame implements MouseListener{
                     this.selectedTile.getPiece().potionUsed();
                     int newHP = this.selectedTile.getPiece().getHp() + dice;
                     this.selectedTile.getPiece().setHp(newHP);
-                    Modal modal = new Modal(this, "Heal", dice +" hp added!");
+                    new Modal(this, "Heal", dice +" hp added!");
                     repaint();
                     if(dice % 2 == 1){
                         unselect(givenRow, givenCol);
@@ -223,11 +263,23 @@ public class GameFrame extends JFrame implements MouseListener{
                     }
 
                 } else {
-                    Modal modal = new Modal(this, "Heal", "This Piece has no Potion!");
+                    new Modal(this, "Heal", "This Piece has no Potion!");
                 }
             }
         }
     }
+
+
+    private void start(int givenRow, int givenCol) {
+
+        if (givenRow == 6 && (givenCol == 9 || givenCol == 10 || givenCol == 11)) {
+
+        this.isGameInPreparationMode = false;
+        this.selectedTile = null;
+        this.initialTile = null;
+        isGreenPlayerTurn = true;
+    }
+}
 
 
     private void renderTiledGrid(Graphics g){
@@ -288,12 +340,12 @@ public class GameFrame extends JFrame implements MouseListener{
             }
         }
 
-        this.tileCollection[1][3].setPiece(new Elf(1,3, "RED", "ELF", 10));
-        this.tileCollection[1][5].setPiece(new Elf(1,5, "RED", "ELF", 10));
-        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED", "DWARF", 12));
-        this.tileCollection[1][7].setPiece(new Dwarf(1,7, "RED", "DWARF", 12));
-        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED", "KNIGHT", 15));
-        this.tileCollection[0][6].setPiece(new Knight(0,6, "RED", "KNIGHT", 15));
+        this.tileCollection[1][3].setPiece(new Elf(1,3, "RED", "ELF", 1));
+        this.tileCollection[1][5].setPiece(new Elf(1,5, "RED", "ELF", 1));
+        this.tileCollection[1][1].setPiece(new Dwarf(1,1, "RED", "DWARF", 1));
+        this.tileCollection[1][7].setPiece(new Dwarf(1,7, "RED", "DWARF", 1));
+        this.tileCollection[0][2].setPiece(new Knight(0,2, "RED", "KNIGHT", 1));
+        this.tileCollection[0][6].setPiece(new Knight(0,6, "RED", "KNIGHT", 1));
 
         this.tileCollection[5][3].setPiece(new Elf(5,3, "GREEN", "ELF", 10));
         this.tileCollection[5][5].setPiece(new Elf(5,5, "GREEN", "ELF", 10));
@@ -309,6 +361,8 @@ public class GameFrame extends JFrame implements MouseListener{
     private void greenTurn(int selectedRow, int selectedCol){
 
         if(isGreenPlayerTurn){
+
+            this.boardColor = Color.GREEN;
 
             if(this.selectedTile != null){
 
@@ -334,9 +388,36 @@ public class GameFrame extends JFrame implements MouseListener{
     }
 
 
+    private void greenPrepTurn(int selectedRow, int selectedCol){
+
+        if(isGreenPlayerTurn){
+
+            this.boardColor = Color.GREEN;
+
+            if(this.selectedTile != null &&
+                    (selectedRow == 5 || selectedRow == 6)){
+
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
+                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+
+                    movement(selectedRow, selectedCol);
+                    this.repaint();
+                    isGreenPlayerTurn = false;
+                    return;
+                }
+            }
+            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("GREEN")){
+                selectPiece(selectedRow, selectedCol);
+            }
+        }
+    }
+
+
     private void redTurn(int selectedRow, int selectedCol){
 
         if(!isGreenPlayerTurn){
+
+            this.boardColor = Color.RED;
 
             if(this.selectedTile != null){
 
@@ -362,6 +443,31 @@ public class GameFrame extends JFrame implements MouseListener{
     }
 
 
+    private void redPrepTurn(int selectedRow, int selectedCol){
+
+        if(!isGreenPlayerTurn){
+
+            this.boardColor = Color.RED;
+
+            if(this.selectedTile != null &&
+                    (selectedRow == 1 || selectedRow == 0)){
+
+                if(this.tileCollection[selectedRow][selectedCol].getPiece() == null &&
+                        this.initialTile.getPiece().isMoveValid(selectedRow, selectedCol, this.tileCollection)){
+
+                    movement(selectedRow, selectedCol);
+                    this.repaint();
+                    isGreenPlayerTurn = true;
+                    return;
+                }
+            }
+            if(this.selectedTile == null && tileCollection[selectedRow][selectedCol].getPiece().getTeam().equals("RED")){
+                selectPiece(selectedRow, selectedCol);
+            }
+        }
+    }
+
+
     private void selectPiece(int selectedRow, int selectedCol){
 
         this.selectedTile = tileCollection[selectedRow][selectedCol];
@@ -373,16 +479,11 @@ public class GameFrame extends JFrame implements MouseListener{
 
     private boolean isGameRunning(){
 
-        String winner;
+
         if(greenPiecesLeft <= 0){
-            winner = "Red Player Won!";
             return false;
         }
-        if(redPiecesLeft <= 0){
-            winner = "Green Player Won!";
-            return false;
-        }
-        return true;
+        return redPiecesLeft > 0;
     }
 
 
@@ -391,10 +492,12 @@ public class GameFrame extends JFrame implements MouseListener{
         if (this.tileCollection[row][col].getPiece().getHp() <= 0){
 
             if(this.tileCollection[row][col].getPiece().getTeam().equals("GREEN")){
-                this.greenPiecesLeft--;
+                greenPiecesLeft--;
+                greenPiecesQueue.offer(this.tileCollection[row][col].getPiece().getPieceType());
             }
             else if (this.tileCollection[row][col].getPiece().getTeam().equals("RED")){
-            this.redPiecesLeft--;
+                redPiecesLeft--;
+                redPiecesQueue.offer(this.tileCollection[row][col].getPiece().getPieceType());
             }
             this.tileCollection[row][col].setPiece(null);
             repaint();
@@ -428,7 +531,7 @@ public class GameFrame extends JFrame implements MouseListener{
     }
 
 
-    public void movement(int givenRow, int givenCol){
+    private void movement(int givenRow, int givenCol){
 
             String team = initialTile.getPiece().getTeam();
             int currentHP = initialTile.getPiece().getHp();
